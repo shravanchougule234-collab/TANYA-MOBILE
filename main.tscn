@@ -1,0 +1,55 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/vehicle.tscn" id="2"]
+
+[sub_resource type="BoxShape3D" id="GroundShape"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="StandardMaterial3D" id="GroundMaterial"]
+albedo_color = Color(0.19, 0.29, 0.19, 1)
+roughness = 1.0
+
+[sub_resource type="Environment" id="Environment"]
+background_mode = 1
+background_color = Color(0.38, 0.58, 0.78, 1)
+sky = null
+ambient_light_source = 3
+ambient_light_color = Color(0.72, 0.78, 0.88, 1)
+ambient_light_energy = 0.65
+
+[sub_resource type="DirectionalLight3D" id="Sun"]
+color = Color(1, 0.94, 0.82, 1)
+energy = 1.15
+shadow_enabled = true
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.9, -0.55, 0)
+light_color = Color(1, 0.94, 0.82, 1)
+light_energy = 1.15
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+position = Vector3(0, -0.5, 0)
+shape = SubResource("GroundShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+position = Vector3(0, -0.5, 0)
+mesh = SubResource("GroundMesh")
+surface_material_override/0 = SubResource("GroundMaterial")
+
+[node name="Player" parent="." instance=ExtResource("1")]
+position = Vector3(0, 1, 5)
+
+[node name="TanyaVehicle" parent="." instance=ExtResource("2")]
+position = Vector3(4, 0.05, 0)
