@@ -25,13 +25,14 @@ jobs:
       - name: Install Android SDK
         run: |
           echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
           ls /usr/local/lib/android/sdk || true
 
       - name: Install Android components
         run: |
           SDK=/usr/local/lib/android/sdk
           yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          "$SDK/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          "$SDK/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-34" "build-tools;34.0.0" "cmdline-tools;latest"
 
       - name: Install Godot 4.3
         run: |
@@ -47,6 +48,7 @@ jobs:
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
           unzip -q Godot_v4.3-stable_export_templates.tpz -d /tmp/templates
           cp -a /tmp/templates/templates/. ~/.local/share/godot/export_templates/4.3.stable/
+          ls ~/.local/share/godot/export_templates/4.3.stable | head
 
       - name: Configure Android paths
         run: |
@@ -54,17 +56,21 @@ jobs:
             -keystore "$HOME/debug.keystore" -storepass android \
             -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
           mkdir -p ~/.config/godot
-          cat > ~/.config/godot/editor_settings-4.tres <<EOF
+          cat > ~/.config/godot/editor_settings-4.3.tres <<EOF
           [gd_resource type="EditorSettings" format=3]
 
           [resource]
-          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/android_sdk_path = "/usr/local/lib/android/sdk"
           export/android/java_sdk_path = "$JAVA_HOME"
           export/android/debug_keystore = "$HOME/debug.keystore"
           export/android/debug_keystore_user = "androiddebugkey"
           export/android/debug_keystore_pass = "android"
           EOF
-          cat ~/.config/godot/editor_settings-4.tres
+          cp ~/.config/godot/editor_settings-4.3.tres ~/.config/godot/editor_settings-4.tres
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PATH=$HOME/debug.keystore" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_USER=androiddebugkey" >> "$GITHUB_ENV"
+          echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
+          cat ~/.config/godot/editor_settings-4.3.tres
 
       - name: Import project
         run: godot --headless --editor --path . --quit || true
