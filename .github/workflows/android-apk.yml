@@ -1,4 +1,3 @@
-
 name: Build TANYA Android APK
 
 on:
@@ -23,7 +22,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-        - name: Install Android SDK
+      - name: Install Android SDK
         run: |
           echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
           ls /usr/local/lib/android/sdk || true
@@ -40,6 +39,7 @@ jobs:
           unzip -q Godot_v4.3-stable_linux.x86_64.zip
           sudo mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
           sudo chmod +x /usr/local/bin/godot
+          godot --version
 
       - name: Install export templates
         run: |
@@ -50,16 +50,24 @@ jobs:
 
       - name: Configure Android paths
         run: |
+          keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android \
+            -keystore "$HOME/debug.keystore" -storepass android \
+            -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
           mkdir -p ~/.config/godot
           cat > ~/.config/godot/editor_settings-4.tres <<EOF
           [gd_resource type="EditorSettings" format=3]
+
           [resource]
           export/android/android_sdk_path = "$ANDROID_HOME"
           export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$HOME/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
           EOF
+          cat ~/.config/godot/editor_settings-4.tres
 
       - name: Import project
-        run: godot --headless --editor --path . --quit
+        run: godot --headless --editor --path . --quit || true
 
       - name: Export APK
         run: |
@@ -68,6 +76,7 @@ jobs:
 
       - name: Verify APK
         run: |
+          ls -lh build/
           test -s build/TANYA-debug.apk
           file build/TANYA-debug.apk
 
