@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3]
 
-[ext_resource type="Script" path="res://scripts/tanya_vehicle.gd" id="1"]
+[ext_resource type="Script" path="res://tanya_vehicle.gd" id="1"]
 
 [sub_resource type="BoxShape3D" id="BoxShape_body"]
 size = Vector3(1.8, 0.7, 3.6)
