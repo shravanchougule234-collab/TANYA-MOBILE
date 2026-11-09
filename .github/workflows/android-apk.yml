@@ -72,14 +72,22 @@ jobs:
           echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
           cat ~/.config/godot/editor_settings-4.3.tres
 
-      - name: Import project
-        run: godot --headless --editor --path . --quit || true
+        - name: Pre-export check
+        run: |
+          SDK=/usr/local/lib/android/sdk
+          ls "$SDK/cmdline-tools/latest/bin/sdkmanager" "$SDK/platform-tools/adb" || true
+          ls "$SDK/build-tools" || true
+          ls "$JAVA_HOME/bin/javac" || true
+          ls ~/.local/share/godot/export_templates/4.3.stable | grep -i android || true
+          ls -l "$HOME/debug.keystore" || true
+          grep -c "export/android" ~/.config/godot/editor_settings-4.tres || true
 
       - name: Export APK
         run: |
           mkdir -p build
-          godot --headless --path . --export-debug "Android" build/TANYA-debug.apk
-
+          godot --headless --verbose --path . --export-debug "Android" build/TANYA-debug.apk > export.log 2>&1 || true
+          grep -inE "error|invalid|missing|not found|keystore|sdk|template" export.log | grep -v 5037 | head -40
+          test -s build/TANYA-debug.apk
       - name: Verify APK
         run: |
           ls -lh build/
