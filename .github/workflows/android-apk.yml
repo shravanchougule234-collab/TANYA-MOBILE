@@ -1,0 +1,38 @@
+
+name: Build TANYA Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3.0
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Prepare build folder
+        run: mkdir -p build
+
+      - name: Import project
+        run: godot --headless --editor --path . --quit
+
+      - name: Build Android APK
+        run: godot --headless --path . --export-debug "Android" build/TANYA-debug.apk
+
+      - name: Check APK
+        run: test -s build/TANYA-debug.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TANYA-Android-APK
+          path: build/TANYA-debug.apk
